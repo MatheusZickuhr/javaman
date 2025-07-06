@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::BufRead;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{env, io};
 use winreg::{RegKey, enums::*};
 
@@ -20,15 +20,44 @@ fn main() {
 
     let parsed_args: ParsedArgs = parse_args(args);
 
+    let javaman_folder = get_javaman_folder();
+    
     if parsed_args.jdk_version.is_some() {
         let jdk_version = parsed_args.jdk_version.unwrap();
-        update_version(jdk_version, "JAVA_HOME", "jdks.properties");
+        let prop_file_path = get_prop_file_path(&javaman_folder, "jdks.properties");
+        
+        update_version(jdk_version, "JAVA_HOME", prop_file_path.as_str());
     }
 
     if parsed_args.mvn_version.is_some() {
         let mvn_version = parsed_args.mvn_version.unwrap();
-        update_version(mvn_version, "MAVEN_HOME", "mvns.properties");
+        let prop_file_path = get_prop_file_path(&javaman_folder, "mvns.properties");
+        
+        update_version(mvn_version, "MAVEN_HOME", prop_file_path.as_str());
     }
+}
+
+fn get_javaman_folder() -> PathBuf {
+    let mut javaman_folder = get_user_folder();
+    javaman_folder.push("javaman");
+    javaman_folder
+}
+
+fn get_prop_file_path(javaman_folder: &PathBuf, prop_file_name: &str) -> String {
+    let mut javaman_folder_clone = javaman_folder.clone();
+    javaman_folder_clone.push(prop_file_name);
+    
+    let prop_file = javaman_folder_clone
+        .as_path()
+        .to_str()
+        .unwrap();
+    
+    prop_file.to_string()
+}
+
+fn get_user_folder() -> PathBuf {
+    let user_folder = env::var("USERPROFILE").unwrap();
+    PathBuf::from(user_folder)
 }
 
 fn update_version(version: String, home_env_variable: &str, config_file_path: &str) {

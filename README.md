@@ -5,7 +5,7 @@ Switch between java and maven versions.
 ## Setup
 
 
-For the tool to work, it is necessary to configure two files pointing to the Java and/or Maven installations. For Java you need the ``jdks.properties`` file, for maven ``mvns.properties``. The files must be in the same directory as Javaman.
+For the tool to work, it is necessary to configure two files pointing to the Java and/or Maven installations. For Java you need the ``jdks.properties`` file, for maven ``mvns.properties``. The files must be in %USERPROFILE%/javaman.
 
 
 #### ``jdks.properties`` example
