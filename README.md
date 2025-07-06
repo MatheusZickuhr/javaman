@@ -1,6 +1,6 @@
 ## Javaman
 
-Switch between java and maven versions.
+Switch between java and maven versions on Windows.
 
 ## Setup
 
