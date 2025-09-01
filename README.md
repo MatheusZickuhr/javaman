@@ -2,11 +2,15 @@
 
 Switch between java and maven versions on Windows.
 
-## Setup
+## Requirements
 
+- Python 3.x.x
 
-For the tool to work, it is necessary to configure two files pointing to the Java and/or Maven installations. For Java you need the ``jdks.properties`` file, for maven ``mvns.properties``. The files must be in %USERPROFILE%/javaman.
+## How to install
 
+- Clone this repo on your user folder
+- Add the project folder to your path
+- Update ``jdks.properties`` and ``mvn.properties`` with your installations
 
 #### ``jdks.properties`` example
 
@@ -22,8 +26,12 @@ For the tool to work, it is necessary to configure two files pointing to the Jav
 3.8.8=C:\Users\mathe\.jdks\corretto-11.0.26
 ```
 
-### Example of usage:
+### Examples of usage:
 
-Set java version to 11: ``javaman --jdk 11``
+Set java version to 11: ``jm --jdk 11``
 
-Set maven version to 3.9.9: ``javaman --mvn 3.9.9``
+Set maven version to 3.9.9: ``jm --mvn 3.9.9``
+
+List installed jdks: ``jm --list jdk``
+
+List installed mvns: ``jm --list mvn``
