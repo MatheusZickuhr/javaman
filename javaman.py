@@ -1,6 +1,4 @@
-import os
 import sys
-from pathlib import Path
 import winreg
 
 MVNS_PROPERTIES_FILE = "mvns.properties"
@@ -20,35 +18,28 @@ class ParsedArgs:
         self.mvn_version = mvn_version
         self.list_command = list_command
 
-    # def __str__(self):
-    #     return "{ jdk_version: " + self.jdk_version + ", mvn_version: " + self.mvn_version + " }"
-
 
 def main():
     args = sys.argv[1:]
     parsed_args = parse_args(args)
 
-    javaman_folder = get_javaman_folder()
-
     if parsed_args.jdk_version:
-        prop_file_path = get_prop_file_path(javaman_folder, JDKS_PROPERTIES_FILE)
-        update_version(parsed_args.jdk_version, "JAVA_HOME", prop_file_path)
+        update_version(parsed_args.jdk_version, "JAVA_HOME", JDKS_PROPERTIES_FILE)
 
     if parsed_args.mvn_version:
-        prop_file_path = get_prop_file_path(javaman_folder, MVNS_PROPERTIES_FILE)
-        update_version(parsed_args.mvn_version, "MAVEN_HOME", prop_file_path)
+        update_version(parsed_args.mvn_version, "MAVEN_HOME", MVNS_PROPERTIES_FILE)
 
     if parsed_args.list_command:
-        execute_list_command(javaman_folder, parsed_args.list_command)
+        execute_list_command(parsed_args.list_command)
 
 
-def execute_list_command(javaman_folder, list_command):
+def execute_list_command(list_command):
     prop_file_path = None
     if list_command == 'jdk':
-        prop_file_path = get_prop_file_path(javaman_folder, JDKS_PROPERTIES_FILE)
+        prop_file_path = JDKS_PROPERTIES_FILE
 
     elif list_command == 'mvn':
-        prop_file_path = get_prop_file_path(javaman_folder, MVNS_PROPERTIES_FILE)
+        prop_file_path = MVNS_PROPERTIES_FILE
 
     else:
         raise Exception("Invalid list command")
@@ -60,16 +51,9 @@ def execute_list_command(javaman_folder, list_command):
     for line in prop_file:
         print(line.replace("\n", ""))
 
-def get_javaman_folder():
-    return get_user_folder() / "javaman"
-
 
 def get_prop_file_path(javaman_folder, prop_file_name):
     return str(javaman_folder / prop_file_name)
-
-
-def get_user_folder():
-    return Path(os.environ["USERPROFILE"])
 
 
 def update_version(version, home_env_variable, config_file_path):

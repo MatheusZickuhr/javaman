@@ -8,9 +8,9 @@ Switch between java and maven versions on Windows.
 
 ## How to install
 
-- Clone this repo on your user folder
+- Clone this repo to any folder
 - Add the project folder to your path
-- Update ``jdks.properties`` and ``mvn.properties`` with your installations
+- Update ``jdks.properties`` and ``mvn.properties`` with your java/maven installations
 
 #### ``jdks.properties`` example
 
