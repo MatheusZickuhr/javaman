@@ -105,11 +105,11 @@ def parse_args(args):
     list_command = None
 
     for i, arg in enumerate(args):
-        if arg == "--jdk":
+        if arg == "use-jdk":
             jdk_version = args[i + 1]
-        elif arg == "--mvn":
+        elif arg == "use-mvn":
             mvn_version = args[i + 1]
-        elif arg == '--list':
+        elif arg == 'list':
             list_command = args[i + 1]
 
     return ParsedArgs(jdk_version, mvn_version, list_command)

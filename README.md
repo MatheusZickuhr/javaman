@@ -28,10 +28,10 @@ Switch between java and maven versions on Windows.
 
 ### Examples of usage:
 
-Set java version to 11: ``jm --jdk 11``
+Set java version to 11: ``jm use-jdk 11``
 
-Set maven version to 3.9.9: ``jm --mvn 3.9.9``
+Set maven version to 3.9.9: ``jm use-mvn 3.9.9``
 
-List installed jdks: ``jm --list jdk``
+List installed jdks: ``jm list jdk``
 
-List installed mvns: ``jm --list mvn``
+List installed mvns: ``jm list mvn``
