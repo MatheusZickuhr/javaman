@@ -1,0 +1,18 @@
+{
+  "Jdks": [
+    {
+      "Version": "23",
+      "HomePath": "C:\\Users\\mathe\\.jdks\\jdk-23.0.2+7",
+      "BinPath": "C:\\Users\\mathe\\.jdks\\jdk-23.0.2+7\\bin",
+      "InUse": false
+    }
+  ],
+  "Mavens": [
+    {
+      "Version": "3.6.3",
+      "HomePath": "C:\\Users\\mathe\\.mvn\\apache-maven-3.6.3",
+      "BinPath": "C:\\Users\\mathe\\.mvn\\apache-maven-3.6.3\\bin",
+      "InUse": true
+    }
+  ]
+}

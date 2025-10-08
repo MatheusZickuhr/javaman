@@ -1,0 +1,19 @@
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.gcno
+*.gcov
+
+*.test
+
+vendor/
+
+*.log
+
+.idea/ # IntelliJ GoLand
+.vscode/ # VS Code
+.DS_Store # macOS
+Thumbs.db # Windows
