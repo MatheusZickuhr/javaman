@@ -12,8 +12,17 @@ func main() {
 
 	configFile := loadConfigFile()
 
+	if configFile == nil {
+		fmt.Println("No config file found")
+		return
+	}
+
 	args := os.Args[1:]
-	parsedArgs := parseArgs(args)
+	parsedArgs, err := parseArgs(args)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if parsedArgs.UseJdkCommand {
 		updateJdkVersion(parsedArgs.JdkVersion, configFile)
@@ -28,7 +37,7 @@ func main() {
 	}
 
 	if parsedArgs.InstallJdkCommand {
-		installJdk(parsedArgs.JdkVersion, configFile)
+		installJava(parsedArgs.JdkVersion, configFile)
 	}
 
 	if parsedArgs.InstallMvnCommand {
@@ -36,7 +45,7 @@ func main() {
 	}
 
 	if parsedArgs.UninstallJdkCommand {
-		uninstallJdk(parsedArgs.JdkVersion, configFile)
+		uninstallJava(parsedArgs.JdkVersion, configFile)
 	}
 
 	if parsedArgs.UninstallMvnCommand {
@@ -45,112 +54,70 @@ func main() {
 
 }
 
-func uninstallJdk(version string, config *ConfigFile) error {
-
-	// Variável para armazenar o índice da instalação a ser removida.
-	// Iniciamos com -1 para indicar que a versão não foi encontrada.
-	foundIndex := -1
-	var installationToRemove Installation
-
-	// Itera sobre a lista de JDKs para encontrar a versão correspondente.
-	for i, jdk := range config.Jdks {
-		if jdk.Version == version {
-			foundIndex = i
-			installationToRemove = jdk
-			break
-		}
-	}
-
-	// Se a versão não for encontrada na configuração, retorna um erro.
-	if foundIndex == -1 {
-		return fmt.Errorf("versão do JDK '%s' não encontrada", version)
-	}
-
-	// Verifica se o HomePath não está vazio para evitar a exclusão da raiz do sistema.
-	if installationToRemove.HomePath == "" {
-		return fmt.Errorf("HomePath para a versão '%s' está vazio, remoção abortada por segurança", version)
-	}
-
-	// Remove o diretório da instalação e todo o seu conteúdo.
-	fmt.Printf("Removendo diretório: %s\n", installationToRemove.HomePath)
-	err := os.RemoveAll(installationToRemove.HomePath)
+func uninstallJava(jdkVersion string, configFile *ConfigFile) {
+	err := uninstallInstallation(jdkVersion, configFile, &configFile.Jdks, "JDK", "JAVA_HOME")
 	if err != nil {
-		return fmt.Errorf("falha ao remover o diretório '%s': %w", installationToRemove.HomePath, err)
+		fmt.Println(err)
 	}
-
-	// se tiver em uso, remove do path
-	if installationToRemove.InUse {
-		systemPath := readEnvVariable("Path")
-		newPath := removeInstallationsFromPath(systemPath, &config.Jdks)
-		setEnvVariable("Path", newPath)
-		removeEnvVariable("JAVA_HOME")
-	}
-
-	// Remove o elemento da slice 'Jdks' utilizando a técnica de slicing.
-	// Isso cria uma nova slice que contém todos os elementos, exceto o do índice encontrado.
-	config.Jdks = append(config.Jdks[:foundIndex], config.Jdks[foundIndex+1:]...)
-
-	// atualiza o arquivo
-	saveConfigFile(config)
-
-	fmt.Printf("Versão '%s' do JDK desinstalada com sucesso.\n", version)
-	return nil
-
 }
 
-func uninstallMvn(version string, config *ConfigFile) error {
+func uninstallMvn(mavenVersion string, configFile *ConfigFile) {
+	err := uninstallInstallation(mavenVersion, configFile, &configFile.Mavens, "Maven", "MAVEN_HOME")
+	if err != nil {
+		fmt.Println(err)
+	}
+}
 
-	// Variável para armazenar o índice da instalação a ser removida.
-	// Iniciamos com -1 para indicar que a versão não foi encontrada.
+func uninstallInstallation(version string, config *ConfigFile, installations *[]Installation, installationType string, homeEnvVar string) error {
 	foundIndex := -1
 	var installationToRemove Installation
 
-	// Itera sobre a lista de Mavens para encontrar a versão correspondente.
-	for i, mvn := range config.Mavens {
-		if mvn.Version == version {
+	for i, inst := range *installations {
+		if inst.Version == version {
 			foundIndex = i
-			installationToRemove = mvn
+			installationToRemove = inst
 			break
 		}
 	}
 
-	// Se a versão não for encontrada na configuração, retorna um erro.
 	if foundIndex == -1 {
-		return fmt.Errorf("versão do Maven '%s' não encontrada", version)
+		return fmt.Errorf("%s version '%s' not found", installationType, version)
 	}
 
-	// Verifica se o HomePath não está vazio para evitar a exclusão da raiz do sistema.
 	if installationToRemove.HomePath == "" {
-		return fmt.Errorf("HomePath para a versão '%s' está vazio, remoção abortada por segurança", version)
+		return fmt.Errorf("HomePath for version '%s' is empty, removal aborted for safety", version)
 	}
 
-	// Remove o diretório da instalação e todo o seu conteúdo.
-	fmt.Printf("Removendo diretório: %s\n", installationToRemove.HomePath)
+	fmt.Printf("Removing directory: %s\n", installationToRemove.HomePath)
 	err := os.RemoveAll(installationToRemove.HomePath)
 	if err != nil {
-		return fmt.Errorf("falha ao remover o diretório '%s': %w", installationToRemove.HomePath, err)
+		return fmt.Errorf("failed to remove directory '%s': %w", installationToRemove.HomePath, err)
 	}
 
-	// se tiver em uso, reomve do path
 	if installationToRemove.InUse {
 		systemPath := readEnvVariable("Path")
-		newPath := removeInstallationsFromPath(systemPath, &config.Mavens)
+		newPath := removeInstallationsFromPath(systemPath, installations)
 		setEnvVariable("Path", newPath)
-		removeEnvVariable("MAVEN_HOME")
+		removeEnvVariable(homeEnvVar)
 	}
 
-	// Remove o elemento da slice 'Mavens' utilizando a técnica de slicing.
-	// Isso cria uma nova slice que contém todos os elementos, exceto o do índice encontrado.
-	config.Mavens = append(config.Mavens[:foundIndex], config.Mavens[foundIndex+1:]...)
+	// remove from installations
+	*installations = append((*installations)[:foundIndex], (*installations)[foundIndex+1:]...)
 
-	// atualiza o arquivo
 	saveConfigFile(config)
 
-	fmt.Printf("Versão '%s' do Maven desinstalada com sucesso.\n", version)
+	fmt.Printf("%s version '%s' uninstalled successfully.\n", installationType, version)
 	return nil
 }
 
 func installMvn(mvnVersion string, configFile *ConfigFile) {
+	for _, inst := range configFile.Mavens {
+		if inst.Version == mvnVersion {
+			fmt.Println("Maven " + mvnVersion + " already installed")
+			return
+		}
+	}
+
 	installPath, err := installMaven(mvnVersion)
 
 	if err != nil {
@@ -167,8 +134,7 @@ func installMvn(mvnVersion string, configFile *ConfigFile) {
 
 }
 
-func installJdk(jdkVersion string, configFile *ConfigFile) {
-
+func installJava(jdkVersion string, configFile *ConfigFile) {
 	for _, inst := range configFile.Jdks {
 		if inst.Version == jdkVersion {
 			fmt.Println("Jdk " + jdkVersion + " already installed")
@@ -176,14 +142,7 @@ func installJdk(jdkVersion string, configFile *ConfigFile) {
 		}
 	}
 
-	fmt.Println("Installing jdk " + jdkVersion)
-
-	zipFileDir := downloadJdkOnTempDir(jdkVersion)
-	jdkPath, err := extrairJDK(zipFileDir)
-
-	if err != nil {
-		fmt.Println(err)
-	}
+	jdkPath, err := installJdk(jdkVersion)
 
 	inst := Installation{Version: jdkVersion, HomePath: jdkPath, BinPath: jdkPath + "\\bin"}
 	configFile.Jdks = append(configFile.Jdks, inst)
@@ -240,7 +199,7 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 	fmt.Println("Maven updated to version " + mavenVersion)
 }
 
-func parseArgs(args []string) ParsedArgs {
+func parseArgs(args []string) (ParsedArgs, error) {
 	var parsed ParsedArgs
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
@@ -264,25 +223,33 @@ func parseArgs(args []string) ParsedArgs {
 		case "uninstall-mvn":
 			parsed.UninstallMvnCommand = true
 			parsed.MvnVersion = args[i+1]
+		default:
+			return parsed, fmt.Errorf("Unknown argument '%s'", args[i])
 		}
 	}
 
-	return parsed
+	return parsed, nil
 }
 
 func executeListCommand(command string, configFile *ConfigFile) {
+	var installations *[]Installation
+
 	switch command {
 	case "jdk":
-		for _, inst := range configFile.Jdks {
-			fmt.Println("Jdk Version " + inst.Version + ", Home path: " + inst.HomePath)
-		}
+		installations = &configFile.Jdks
 	case "mvn":
-		for _, inst := range configFile.Mavens {
-			fmt.Println("Maven Version " + inst.Version + ", Home path: " + inst.HomePath)
-		}
+		installations = &configFile.Mavens
 	default:
 		fmt.Println("Invalid list command")
 		return
+	}
+
+	for _, inst := range *installations {
+		if inst.InUse {
+			fmt.Println(inst.Version + " (In Use)")
+		} else {
+			fmt.Println(inst.Version)
+		}
 	}
 }
 
@@ -340,29 +307,19 @@ func setEnvVariable(name, value string) {
 }
 
 func removeEnvVariable(name string) error {
-	// 1. Abrir a chave do registro onde as variáveis de ambiente do usuário estão localizadas.
-	// registry.CURRENT_USER corresponde a HKEY_CURRENT_USER.
-	// O segundo argumento é o caminho para a subchave.
-	// O terceiro argumento especifica o acesso desejado. Precisamos de acesso de escrita (WRITE) para deletar.
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.WRITE)
 	if err != nil {
-		// Se a chave 'Environment' não existir, o que é muito raro, o erro será tratado aqui.
-		return fmt.Errorf("não foi possível abrir a chave do registro 'Environment': %w", err)
+		return fmt.Errorf("Error opening registry key 'Environment': %w", err)
 	}
-	// 2. É uma boa prática fechar a chave quando terminamos de usá-la.
+
 	defer key.Close()
 
-	// 3. Deletar o valor (que representa a variável de ambiente) dentro da chave aberta.
 	err = key.DeleteValue(name)
 	if err != nil {
-		// Este erro pode ocorrer se a variável de ambiente não existir no registro,
-		// o que pode ser um caso esperado. Você pode querer tratar este erro especificamente.
-		// Exemplo: if err == registry.ErrNotExist { ... }
-		return fmt.Errorf("não foi possível deletar a variável '%s' do registro: %w", name, err)
+		return fmt.Errorf("error deleting variable '%s' from registry: %w", name, err)
 	}
 
-	fmt.Printf("Variável de ambiente '%s' removida com sucesso do registro.\n", name)
-	fmt.Println("Atenção: A maioria dos programas precisa ser reiniciada para que a mudança tenha efeito.")
+	fmt.Printf("Env variable '%s' succesfully removed.\n", name)
 
 	return nil
 }

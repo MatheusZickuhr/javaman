@@ -13,9 +13,7 @@ type ConfigFile struct {
 }
 
 func (c ConfigFile) GetJdkByVersion(version string) *Installation {
-	// Itere usando o índice (i) e o valor (inst)
 	for i := range c.Jdks {
-		// Acesse o elemento diretamente pelo índice para obter seu endereço
 		if version == c.Jdks[i].Version {
 			return &c.Jdks[i] // CORRETO: Retorna o endereço do elemento na lista
 		}
@@ -26,9 +24,7 @@ func (c ConfigFile) GetJdkByVersion(version string) *Installation {
 
 func (c ConfigFile) GetMavenByVersion(version string) *Installation {
 
-	// Itere usando o índice (i) e o valor (inst)
 	for i := range c.Mavens {
-		// Acesse o elemento diretamente pelo índice para obter seu endereço
 		if version == c.Mavens[i].Version {
 			return &c.Mavens[i] // CORRETO: Retorna o endereço do elemento na lista
 		}
@@ -62,30 +58,17 @@ func loadConfigFile() *ConfigFile {
 	return &configFile
 }
 
-// Retornos:
-//
-//	error: Um erro, se ocorrer algum durante o processo.
 func saveConfigFile(config *ConfigFile) error {
-	// 1. Converter (Marshal) a struct para um slice de bytes no formato JSON.
-	// Usamos MarshalIndent para que o JSON fique formatado (com quebras de linha e indentação),
-	// o que o torna mais legível para humanos.
-	// O "" significa sem prefixo por linha, e "  " significa usar 2 espaços para indentação.
-	dadosJSON, err := json.MarshalIndent(config, "", "  ")
+
+	jsonAsByteArray, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
-		// Retorna um erro mais descritivo envolvendo o erro original.
-		return fmt.Errorf("erro ao converter a struct para JSON: %w", err)
+		return fmt.Errorf("error converting struct to JSON: %w", err)
 	}
 
-	// 2. Gravar o slice de bytes no arquivo "javaman.json".
-	// A função os.WriteFile lida com a criação do arquivo se ele não existir
-	// ou com a substituição do conteúdo se ele já existir.
-	// 0644 é uma permissão de arquivo padrão (leitura/escrita para o proprietário,
-	// e apenas leitura para os outros).
-	err = os.WriteFile("javaman.json", dadosJSON, 0644)
+	err = os.WriteFile("javaman.json", jsonAsByteArray, 0644)
 	if err != nil {
-		return fmt.Errorf("erro ao gravar o arquivo JSON: %w", err)
+		return fmt.Errorf("error writing JSON file: %w", err)
 	}
 
-	// 3. Se tudo correu bem, retorna nil (sem erro).
 	return nil
 }
