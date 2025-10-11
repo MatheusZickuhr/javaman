@@ -12,8 +12,7 @@
 vendor/
 
 *.log
-
-.idea/ # IntelliJ GoLand
-.vscode/ # VS Code
-.DS_Store # macOS
-Thumbs.db # Windows
+.idea
+.idea/
+.vscode/
+.vscode
