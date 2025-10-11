@@ -175,6 +175,7 @@ func updateJdkVersion(jdkVersion string, configFile *ConfigFile) {
 	saveConfigFile(configFile)
 
 	fmt.Println("JDK updated to version " + jdkVersion)
+	fmt.Println("Restart your terminal to apply the changes")
 }
 
 func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
@@ -197,6 +198,7 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 	saveConfigFile(configFile)
 
 	fmt.Println("Maven updated to version " + mavenVersion)
+	fmt.Println("Restart your terminal to apply the changes")
 }
 
 func parseArgs(args []string) (ParsedArgs, error) {
@@ -224,7 +226,7 @@ func parseArgs(args []string) (ParsedArgs, error) {
 			parsed.UninstallMvnCommand = true
 			parsed.MvnVersion = args[i+1]
 		default:
-			return parsed, fmt.Errorf("Unknown argument '%s'", args[i])
+			return parsed, fmt.Errorf("unknown argument '%s'", args[i])
 		}
 	}
 
@@ -309,7 +311,7 @@ func setEnvVariable(name, value string) {
 func removeEnvVariable(name string) error {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.WRITE)
 	if err != nil {
-		return fmt.Errorf("Error opening registry key 'Environment': %w", err)
+		return fmt.Errorf("error opening registry key 'Environment': %w", err)
 	}
 
 	defer key.Close()
