@@ -203,31 +203,30 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 
 func parseArgs(args []string) (ParsedArgs, error) {
 	var parsed ParsedArgs
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "use-jdk":
-			parsed.UseJdkCommand = true
-			parsed.JdkVersion = args[i+1]
-		case "use-mvn":
-			parsed.UseMvnCommand = true
-			parsed.MvnVersion = args[i+1]
-		case "list":
-			parsed.ListCommand = args[i+1]
-		case "install-jdk":
-			parsed.InstallJdkCommand = true
-			parsed.JdkVersion = args[i+1]
-		case "install-mvn":
-			parsed.InstallMvnCommand = true
-			parsed.MvnVersion = args[i+1]
-		case "uninstall-jdk":
-			parsed.UninstallJdkCommand = true
-			parsed.JdkVersion = args[i+1]
-		case "uninstall-mvn":
-			parsed.UninstallMvnCommand = true
-			parsed.MvnVersion = args[i+1]
-		default:
-			return parsed, fmt.Errorf("unknown argument '%s'", args[i])
-		}
+
+	switch args[0] {
+	case "use-jdk":
+		parsed.UseJdkCommand = true
+		parsed.JdkVersion = args[1]
+	case "use-mvn":
+		parsed.UseMvnCommand = true
+		parsed.MvnVersion = args[1]
+	case "list":
+		parsed.ListCommand = args[1]
+	case "install-jdk":
+		parsed.InstallJdkCommand = true
+		parsed.JdkVersion = args[1]
+	case "install-mvn":
+		parsed.InstallMvnCommand = true
+		parsed.MvnVersion = args[1]
+	case "uninstall-jdk":
+		parsed.UninstallJdkCommand = true
+		parsed.JdkVersion = args[1]
+	case "uninstall-mvn":
+		parsed.UninstallMvnCommand = true
+		parsed.MvnVersion = args[1]
+	default:
+		return parsed, fmt.Errorf("unknown argument '%s'", args[0])
 	}
 
 	return parsed, nil
