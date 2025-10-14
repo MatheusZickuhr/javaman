@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 type ConfigFile struct {
@@ -34,7 +35,12 @@ func (c ConfigFile) GetMavenByVersion(version string) *Installation {
 }
 
 func loadConfigFile() *ConfigFile {
-	jsonFile, err := os.Open("javaman.json")
+
+	fullExecutablePath, _ := os.Executable()
+
+	executablePath := filepath.Dir(fullExecutablePath)
+
+	jsonFile, err := os.Open(filepath.Join(executablePath, "javaman.json"))
 	if err != nil {
 		fmt.Println(err)
 		return nil
