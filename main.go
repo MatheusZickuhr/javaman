@@ -119,7 +119,8 @@ func installMvn(mvnVersion string, configFile *ConfigFile) {
 	installPath, err := installMaven(mvnVersion)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	configFile.Mavens = append(configFile.Mavens, Installation{HomePath: installPath, BinPath: installPath + "\\bin", Version: mvnVersion})
@@ -141,6 +142,11 @@ func installJava(jdkVersion string, configFile *ConfigFile) {
 	}
 
 	jdkPath, err := installJdk(jdkVersion)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	inst := Installation{Version: jdkVersion, HomePath: jdkPath, BinPath: jdkPath + "\\bin"}
 	configFile.Jdks = append(configFile.Jdks, inst)
