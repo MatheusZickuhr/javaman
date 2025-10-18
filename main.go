@@ -94,13 +94,6 @@ func uninstallInstallation(version string, config *ConfigFile, installations *[]
 		return fmt.Errorf("failed to remove directory '%s': %w", installationToRemove.HomePath, err)
 	}
 
-	if installationToRemove.InUse {
-		systemPath := readEnvVariable("Path")
-		newPath := removeInstallationsFromPath(systemPath, installations)
-		setEnvVariable("Path", newPath)
-		removeEnvVariable(homeEnvVar)
-	}
-
 	// remove from installations
 	*installations = append((*installations)[:foundIndex], (*installations)[foundIndex+1:]...)
 
@@ -164,13 +157,15 @@ func updateJdkVersion(jdkVersion string, configFile *ConfigFile) {
 		return
 	}
 
-	systemPath := readEnvVariable("Path")
-	newPath := removeInstallationsFromPath(systemPath, installations)
-	newPath = addNewInstallationToPath(newPath, selected)
-
-	setEnvVariable("Path", newPath)
+	setEnvVariable("JAVA_BIN_PATH", selected.BinPath)
 	setEnvVariable("JAVA_HOME", selected.HomePath)
 
+	systemPath := readEnvVariable("Path")
+	newPath := removeBinFolderFromPath(systemPath, "%JAVA_BIN_PATH%")
+	newPath = addNewBinFolderToPath(newPath, "%JAVA_BIN_PATH%")
+	setEnvVariable("Path", newPath)
+
+	setInUseToFalse(installations)
 	selected.InUse = true
 	saveConfigFile(configFile)
 
@@ -187,13 +182,15 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 		return
 	}
 
-	systemPath := readEnvVariable("Path")
-	newPath := removeInstallationsFromPath(systemPath, installations)
-	newPath = addNewInstallationToPath(newPath, selected)
-
-	setEnvVariable("Path", newPath)
+	setEnvVariable("MAVEN_BIN_PATH", selected.BinPath)
 	setEnvVariable("MAVEN_HOME", selected.HomePath)
 
+	systemPath := readEnvVariable("Path")
+	newPath := removeBinFolderFromPath(systemPath, "%MAVEN_BIN_PATH%")
+	newPath = addNewBinFolderToPath(newPath, "%MAVEN_BIN_PATH%")
+	setEnvVariable("Path", newPath)
+
+	setInUseToFalse(installations)
 	selected.InUse = true
 	saveConfigFile(configFile)
 
@@ -278,6 +275,24 @@ func addNewInstallationToPath(path string, inst *Installation) string {
 	return path + ";" + inst.BinPath
 }
 
+func addNewBinFolderToPath(path string, binFolder string) string {
+	return path + ";" + binFolder
+}
+
+func removeBinFolderFromPath(path string, toBeRemovedBinFolder string) string {
+	parts := strings.Split(path, ";")
+
+	var newParts []string
+	for _, part := range parts {
+		if toBeRemovedBinFolder == part {
+			continue
+		}
+		newParts = append(newParts, part)
+	}
+
+	return strings.Join(newParts, ";")
+}
+
 func readEnvVariable(name string) string {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Environment`, registry.QUERY_VALUE)
 	if err != nil {
@@ -323,4 +338,12 @@ func removeEnvVariable(name string) error {
 	fmt.Printf("Env variable '%s' succesfully removed.\n", name)
 
 	return nil
+}
+
+func setInUseToFalse(installations *[]Installation) {
+
+	for i := range *installations {
+		installation := &(*installations)[i]
+		installation.InUse = false
+	}
 }

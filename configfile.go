@@ -35,12 +35,7 @@ func (c ConfigFile) GetMavenByVersion(version string) *Installation {
 }
 
 func loadConfigFile() *ConfigFile {
-
-	fullExecutablePath, _ := os.Executable()
-
-	executablePath := filepath.Dir(fullExecutablePath)
-
-	jsonFile, err := os.Open(filepath.Join(executablePath, "javaman.json"))
+	jsonFile, err := os.Open(getConfigFilePath())
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -71,10 +66,16 @@ func saveConfigFile(config *ConfigFile) error {
 		return fmt.Errorf("error converting struct to JSON: %w", err)
 	}
 
-	err = os.WriteFile("javaman.json", jsonAsByteArray, 0644)
+	err = os.WriteFile(getConfigFilePath(), jsonAsByteArray, 0644)
 	if err != nil {
 		return fmt.Errorf("error writing JSON file: %w", err)
 	}
 
 	return nil
+}
+
+func getConfigFilePath() string {
+	fullExecutablePath, _ := os.Executable()
+	executablePath := filepath.Dir(fullExecutablePath)
+	return filepath.Join(executablePath, "javaman.json")
 }
