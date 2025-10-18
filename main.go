@@ -52,6 +52,22 @@ func main() {
 		uninstallMvn(parsedArgs.MvnVersion, configFile)
 	}
 
+	if parsedArgs.HelpCommand {
+		displayHelp()
+	}
+
+}
+
+func displayHelp() {
+	fmt.Println("Usage:")
+	fmt.Println("  use-jdk <version>        - Switch to specified JDK version")
+	fmt.Println("  use-mvn <version>        - Switch to specified Maven version")
+	fmt.Println("  list jdk                 - List all installed JDK versions")
+	fmt.Println("  list mvn                 - List all installed Maven versions")
+	fmt.Println("  install-jdk <version>    - Install specified JDK version")
+	fmt.Println("  install-mvn <version>    - Install specified Maven version")
+	fmt.Println("  uninstall-jdk <version>  - Uninstall specified JDK version")
+	fmt.Println("  uninstall-mvn <version>  - Uninstall specified Maven version")
 }
 
 func uninstallJava(jdkVersion string, configFile *ConfigFile) {
@@ -201,6 +217,11 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 func parseArgs(args []string) (ParsedArgs, error) {
 	var parsed ParsedArgs
 
+	if len(args) == 0 {
+		parsed.HelpCommand = true
+		return parsed, nil
+	}
+
 	switch args[0] {
 	case "use-jdk":
 		parsed.UseJdkCommand = true
@@ -222,6 +243,8 @@ func parseArgs(args []string) (ParsedArgs, error) {
 	case "uninstall-mvn":
 		parsed.UninstallMvnCommand = true
 		parsed.MvnVersion = args[1]
+	case "help":
+		parsed.HelpCommand = true
 	default:
 		return parsed, fmt.Errorf("unknown argument '%s'", args[0])
 	}

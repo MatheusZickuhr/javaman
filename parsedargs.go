@@ -10,4 +10,5 @@ type ParsedArgs struct {
 	InstallMvnCommand   bool
 	UninstallJdkCommand bool
 	UninstallMvnCommand bool
+	HelpCommand         bool
 }
