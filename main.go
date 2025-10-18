@@ -24,35 +24,24 @@ func main() {
 		fmt.Println(err)
 	}
 
-	if parsedArgs.UseJdkCommand {
+	switch parsedArgs.Command {
+	case CmdUseJdk:
 		updateJdkVersion(parsedArgs.JdkVersion, configFile)
-	}
-
-	if parsedArgs.UseMvnCommand {
+	case CmdUseMvn:
 		updateMavenVersion(parsedArgs.MvnVersion, configFile)
-	}
-
-	if parsedArgs.ListCommand != "" {
-		executeListCommand(parsedArgs.ListCommand, configFile)
-	}
-
-	if parsedArgs.InstallJdkCommand {
+	case CmdList:
+		executeListCommand(parsedArgs.ListType, configFile)
+	case CmdInstallJdk:
 		installJava(parsedArgs.JdkVersion, configFile)
-	}
-
-	if parsedArgs.InstallMvnCommand {
+	case CmdInstallMvn:
 		installMvn(parsedArgs.MvnVersion, configFile)
-	}
-
-	if parsedArgs.UninstallJdkCommand {
+	case CmdUninstallJdk:
 		uninstallJava(parsedArgs.JdkVersion, configFile)
-	}
-
-	if parsedArgs.UninstallMvnCommand {
+	case CmdUninstallMvn:
 		uninstallMvn(parsedArgs.MvnVersion, configFile)
-	}
-
-	if parsedArgs.HelpCommand {
+	case CmdHelp:
+		displayHelp()
+	default:
 		displayHelp()
 	}
 
@@ -169,7 +158,7 @@ func updateJdkVersion(jdkVersion string, configFile *ConfigFile) {
 	selected := configFile.GetJdkByVersion(jdkVersion)
 
 	if selected == nil {
-		fmt.Printf("No installation found for version %s in file %s\n", jdkVersion, configFile)
+		fmt.Printf("No installation found for version %s in config file\n", jdkVersion)
 		return
 	}
 
@@ -194,7 +183,7 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 	selected := configFile.GetMavenByVersion(mavenVersion)
 
 	if selected == nil {
-		fmt.Printf("No installation found for version %s in file %s\n", mavenVersion, configFile)
+		fmt.Printf("No installation found for version %s in config file\n", mavenVersion)
 		return
 	}
 
@@ -212,44 +201,6 @@ func updateMavenVersion(mavenVersion string, configFile *ConfigFile) {
 
 	fmt.Println("Maven updated to version " + mavenVersion)
 	fmt.Println("Restart your terminal to apply the changes")
-}
-
-func parseArgs(args []string) (ParsedArgs, error) {
-	var parsed ParsedArgs
-
-	if len(args) == 0 {
-		parsed.HelpCommand = true
-		return parsed, nil
-	}
-
-	switch args[0] {
-	case "use-jdk":
-		parsed.UseJdkCommand = true
-		parsed.JdkVersion = args[1]
-	case "use-mvn":
-		parsed.UseMvnCommand = true
-		parsed.MvnVersion = args[1]
-	case "list":
-		parsed.ListCommand = args[1]
-	case "install-jdk":
-		parsed.InstallJdkCommand = true
-		parsed.JdkVersion = args[1]
-	case "install-mvn":
-		parsed.InstallMvnCommand = true
-		parsed.MvnVersion = args[1]
-	case "uninstall-jdk":
-		parsed.UninstallJdkCommand = true
-		parsed.JdkVersion = args[1]
-	case "uninstall-mvn":
-		parsed.UninstallMvnCommand = true
-		parsed.MvnVersion = args[1]
-	case "help":
-		parsed.HelpCommand = true
-	default:
-		return parsed, fmt.Errorf("unknown argument '%s'", args[0])
-	}
-
-	return parsed, nil
 }
 
 func executeListCommand(command string, configFile *ConfigFile) {
