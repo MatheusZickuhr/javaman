@@ -19,7 +19,7 @@ func installMaven(version string) (string, error) {
 		return "", err
 	}
 
-	installRootPath := filepath.Join(homeDir, ".mvn")
+	installRootPath := filepath.Join(homeDir, ".mvns")
 	versionFolderName := fmt.Sprintf("apache-maven-%s", version)
 	finalInstallPath := filepath.Join(installRootPath, versionFolderName)
 	zipFileName := fmt.Sprintf("apache-maven-%s-bin.zip", version)
