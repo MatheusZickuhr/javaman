@@ -11,7 +11,8 @@
 
 ## Installation
 
-Download from releases page
+- Download from releases page [here](https://github.com/MatheusZickuhr/javaman/releases) 
+- Add the application folder to your user's path environment variable
 
 ## Usage
 
